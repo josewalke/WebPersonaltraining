@@ -1,0 +1,6 @@
+.cursor/
+graphify-out/
+node_modules/
+.git/
+frontend/node_modules/
+backend/node_modules/

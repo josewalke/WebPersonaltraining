@@ -1,0 +1,38 @@
+---
+description: Layout fluido Power Up — misma composición en escritorio, sin marco fijo
+globs: "frontend/**/*.{tsx,jsx,css}"
+alwaysApply: false
+---
+
+# Responsive layout (Power Up)
+
+## Objetivo
+
+Misma **composición** en portátiles (p. ej. 14″ y 16″): columnas y posiciones estables. Se ajustan tamaños y espacios; no se reorganiza el layout por pulgadas.
+
+Las pulgadas no mandan: importan el **ancho CSS del viewport**, la resolución, el escalado del SO y el zoom.
+
+## Qué hacer
+
+- **Escritorio (`desk`, ≥64rem / 1024px):** conservar columnas y posiciones (`desk:grid-cols-12`, etc.). Fluidizar con `clamp()`, `vw`/`dvh` y padding relativo.
+- **Contenido:** usar `.page-shell` con márgenes proporcionales y un límite amplio para monitores grandes; no encerrar el marketing en 72rem si eso deja grandes vacíos laterales. Limitar el ancho de lectura de párrafos por separado. El **fondo** de la sección va a **todo el ancho** (full-bleed); no envolver toda la web en un canvas de ancho fijo.
+- **Hero de inicio:** mantener las tres frases del título en escritorio (`.home-hero-heading`), tamaño fluido y espacio reservado para el retrato (`.home-hero-content`). Alinear el margen de navegación con `.page-shell`. En móvil permitir que el texto se adapte naturalmente.
+- **Altura:** preferir scroll vertical a encoger la página entera hasta ilegible.
+- **Móvil / estrecho (`max-desk`):** solo entonces reorganizar (apilar columnas, ocultar decoración no esencial).
+
+## Prohibido
+
+- Escalar toda la página con `transform: scale(...)` / “design canvas” / zoom global que genere **bandas negras** o letterboxing.
+- Fijar todas las medidas en px y forzar que “se vea igual al píxel” en cualquier pantalla.
+- Cambiar la distribución (de 12 columnas a 1) solo porque el portátil es más pequeño, si el contenido aún cabe con `desk`.
+- Tratar el `max-width` del contenido como si fuera el fondo: el fondo sigue siendo full-bleed; el shell limita solo el texto/UI.
+
+## Referencias en el repo
+
+- Breakpoint: `--breakpoint-desk` en `frontend/src/index.css`
+- Contenedor: clase `.page-shell`
+- Ejemplo: `frontend/src/pages/HomePage.tsx` (hero full-bleed + grid `desk`)
+
+## Admin / cuenta / acceso
+
+Los paneles de app pueden seguir siendo más “responsive utilitario” (tabs, sticky, formularios). Esta regla prioriza páginas de **marketing / marca**.

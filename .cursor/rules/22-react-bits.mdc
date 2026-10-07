@@ -1,0 +1,32 @@
+---
+description: React Bits para textos animados, fondos, efectos e interacciones visuales del frontend
+globs: "frontend/**/*"
+alwaysApply: false
+---
+
+# React Bits
+
+Usa React Bits como catálogo preferente cuando una tarea de UI requiera textos animados, fondos, efectos o interacciones visuales y no haya una implementación local adecuada. Reutiliza primero lo existente y no añadas animación solo por tener disponible el catálogo.
+
+## Fuentes e integración
+
+- Documentación oficial: https://reactbits.dev/get-started/introduction
+- Instalación: https://reactbits.dev/get-started/installation
+- Código fuente: https://github.com/DavidHDev/react-bits
+- Consulta la página del componente elegido y comprueba su código, licencia, dependencias e instrucciones actuales antes de integrarlo. No inventes nombres de componentes ni comandos de instalación.
+- Prefiere la variante **TypeScript + Tailwind (TS-TW)** para este proyecto. Si una variante con CSS encaja mejor, adapta sus estilos sin sustituir el sistema visual existente.
+- React Bits se incorpora por componentes: copia el código oficial o usa el comando de shadcn/jsrepo indicado en su página. No instales un paquete genérico supuesto ni descargues todo el catálogo.
+- Instala únicamente las dependencias que use la pieza elegida, desde `frontend/` y con el gestor existente. Si necesitas configurar un registry o aliases, conserva la configuración previa y modifica solo lo necesario.
+- Ubica las piezas integradas en `frontend/src/components/` siguiendo la estructura real. Mantén la lógica de negocio separada y registra en un comentario breve la fuente/variante para facilitar mantenimiento; conserva los avisos de licencia que correspondan.
+
+## Diseño, accesibilidad y rendimiento
+
+- Adapta colores, tipografía, espaciado y textos a WebPersonaltraining. Coordina los estilos con las piezas de 21st.dev.
+- Respeta `prefers-reduced-motion`: ofrece una presentación estática o una interacción equivalente. El contenido y los controles deben seguir siendo utilizables sin animación.
+- Conserva navegación por teclado, foco visible, nombres accesibles y contraste. Los fondos decorativos no interceptan interacciones ni dificultan la lectura.
+- Evalúa el coste del efecto en móvil. Detén animaciones al desmontar y cuando no sean visibles si corresponde; limpia listeners, timers y recursos gráficos. No añadas WebGL o dependencias pesadas para un efecto que pueda resolverse de forma más sencilla.
+- Si no hay una pieza adecuada o el catálogo falla, implementa la alternativa local e informa brevemente; no bloquees la tarea.
+
+## Verificación
+
+Para un componente incorporado, comprueba el build y el lint disponibles y verifica su interacción, responsive y movimiento reducido. Añadir esta regla configura el flujo de trabajo; no significa que ya haya componentes React Bits instalados o renderizados.

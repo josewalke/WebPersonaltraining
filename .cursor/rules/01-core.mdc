@@ -1,0 +1,83 @@
+---
+description: Core engineering rules (todos los proyectos)
+alwaysApply: true
+---
+
+# Core Engineering Rules
+
+Shared project conventions are maintained in `AGENTS.md`. User instructions and execution-environment requirements take precedence; `AGENTS.md` takes precedence over local rules and skills when they disagree.
+
+## Latency
+
+Skip extra tool round-trips when the target file is already known. Graphify and skill-file reads are for discovery and large work, not for every edit. Inspect, reuse, and verify — without ceremony.
+
+## Understand before editing
+
+Before changing code:
+
+1. Inspect the relevant implementation.
+2. Inspect directly related files.
+3. Understand how the feature currently works.
+4. Look for existing project patterns that solve similar problems.
+
+Do not assume how the repository works.
+
+## Minimal changes
+
+- Make the smallest coherent change that solves the task.
+- Do not modify unrelated files.
+- Do not perform unrelated refactors.
+- Preserve existing behavior unless explicitly requested otherwise.
+- Prefer extending existing code over creating parallel implementations.
+
+## Reuse first
+
+Before creating new code, search the repository for an existing implementation that can be reused or extended.
+
+Before adding a component, service, utility, hook, repository, controller, abstraction, or dependency, check whether an equivalent already exists.
+
+## Architecture
+
+Respect the existing architecture. Avoid unnecessary layers and premature abstractions.
+
+## Clean Code
+
+Prefer meaningful names, focused functions, early returns, low nesting, explicit control flow, and clear boundaries.
+
+Do not apply arbitrary metrics (e.g. max function line counts). Readability and maintainability matter more.
+
+## Scope
+
+Do not create documentation files, migration scripts, additional abstractions, compatibility layers, example files, or dependencies unless necessary for the requested task.
+
+## Proceed when clear
+
+When the requested task is clear, proceed with the implementation.
+
+Do not repeatedly ask for confirmation for normal, reversible development decisions.
+
+An explicit request authorizes the normal implementation decisions needed to complete its scope, including security-related work. Do not ask again for permission already granted.
+
+Ask only when an essential product decision is missing, the behavior is genuinely ambiguous, or a destructive action, potential data loss, or external effect is outside the authorized scope. Handling credentials requires protecting them; their mere involvement is not a reason to stop.
+
+Create commits only when the user requests them or has authorized that workflow. Never include unrelated user changes or discard prior work to recover from an error.
+
+## Never weaken safeguards
+
+Never fix a local problem by disabling TypeScript checks, ESLint rules, authentication, authorization, validation, tests, or security checks unless explicitly requested and justified. Fix the underlying problem instead.
+
+## Verification
+
+After editing:
+
+1. Inspect the diff.
+2. Check for errors.
+3. Run available checks relevant to the change and its risk (tests/typecheck/lint/build or manual verification). Discover actual commands from project manifests; do not invent scripts or install test tooling solely for minor text/configuration edits.
+4. Fix problems introduced by the change.
+
+Never report verification as successful if it was not actually performed.
+
+## Communication
+
+Respond in Spanish unless the user writes in another language.
+Be concise. At the end, briefly report what changed, important decisions, verification performed, and anything unresolved.

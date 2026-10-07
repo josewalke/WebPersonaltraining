@@ -1,0 +1,36 @@
+---
+description: TypeScript coding standards
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# TypeScript
+
+- Preserve strict type safety.
+- Do not use `any` unless there is no reasonable alternative.
+- Prefer `unknown` over `any` for unknown external data.
+- Infer types when TypeScript can clearly infer them.
+- Avoid redundant explicit types.
+- Reuse existing domain types; do not duplicate interfaces for the same entity.
+- Narrow nullable values explicitly.
+- Handle optional values safely.
+- Avoid non-null assertions (`!`) unless the invariant is genuinely guaranteed.
+
+## Functions
+
+Prefer small focused responsibilities, early returns, descriptive names, explicit inputs/outputs, and pure functions when practical.
+
+Do not split functions solely to reduce line count.
+
+## Async
+
+- Prefer async/await.
+- Always handle rejected promises appropriately.
+- Avoid unnecessary sequential awaits when operations are independent.
+- Do not introduce concurrency if ordering matters.
+
+## Imports
+
+- Follow the repository's existing import conventions.
+- Remove unused imports.
+- Do not change import style across unrelated files.

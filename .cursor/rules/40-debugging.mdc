@@ -1,0 +1,23 @@
+---
+description: Use when investigating bugs, unexpected behavior, crashes or failing code
+alwaysApply: false
+---
+
+# Debugging Workflow
+
+Do not immediately rewrite code when investigating a bug.
+
+Follow this order:
+
+1. Understand the reported behavior.
+2. Find the execution path involved.
+3. Identify the most likely root cause.
+4. Gather evidence from the code (and logs/runtime when available).
+5. Make the smallest fix addressing the root cause.
+6. Verify the behavior after the change.
+
+Do not mask errors with arbitrary fallbacks, empty catch blocks, optional chaining everywhere, hardcoded values, disabled validation, or disabled type checking unless that behavior is intentionally required.
+
+When an error message exists, investigate it before modifying unrelated code.
+
+If a first fix does not work, reconsider the root cause instead of stacking additional patches.

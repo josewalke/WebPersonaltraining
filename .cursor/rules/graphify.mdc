@@ -1,0 +1,22 @@
+---
+description: Graphify — consultar el grafo solo en exploración amplia
+alwaysApply: true
+---
+
+# Graphify (WebPersonaltraining)
+
+Graphify está preparado mediante `.graphifyignore`; la presencia de `graphify-out/` por sí sola no significa que haya un índice. El grafo generado se excluye de Git.
+
+Si el workspace tiene `graphify-out/graph.json` y refleja el código actual:
+
+**Consulta** (`graphify query` / `path` / `explain`, PATH `~/.local/bin`) solo cuando no sepas qué archivos tocar, el cambio sea transversal, o lances un subagente de exploración. Una consulta por tema. Si el mapa de hubs ya está en el contexto, no lances query para orientarte.
+
+**No consultes** si el archivo ya está nombrado, es un arreglo pequeño / follow-up, o el grafo ya orientó en este chat. Ve directo a Read/Grep.
+
+No uses el grafo de otro repositorio. Si falta el índice o está desactualizado, usa búsqueda directa y lectura de código; no bloquees la tarea ni instales herramientas solo para un cambio local.
+
+Para (re)indexar, utiliza la instalación de Graphify disponible en el entorno. En la máquina actual existe este helper opcional; comprueba que siga disponible antes de usarlo y ejecútalo desde la raíz del repositorio:
+
+`~/Desktop/Skills-Cursor/activar-graphify.sh "$PWD"`
+
+`.graphifyignore` excluye `.cursor/` y `node_modules` para que el grafo sea el de `frontend/` y `backend/`, no el pack de skills.

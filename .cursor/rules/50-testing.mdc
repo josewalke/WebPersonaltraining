@@ -1,0 +1,26 @@
+---
+description: Testing standards and verification
+globs: "**/*.{test,spec}.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# Testing
+
+Tests should verify behavior, not implementation details.
+
+Prioritize:
+
+1. business-critical behavior
+2. edge cases
+3. regressions
+4. error handling
+
+Avoid tests that merely duplicate the implementation.
+
+When fixing a reproducible bug, add or update a regression test when the project already has an appropriate testing setup.
+
+Do not rewrite unrelated tests.
+
+Do not weaken assertions merely to make tests pass.
+
+If a test fails after a change, determine whether the implementation is incorrect, the expected behavior legitimately changed, or the test itself is incorrect — before modifying the test.

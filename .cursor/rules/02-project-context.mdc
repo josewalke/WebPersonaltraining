@@ -1,0 +1,37 @@
+---
+description: WebPersonaltraining — layout, stack y convenciones del repo
+alwaysApply: true
+---
+
+# Project context — WebPersonaltraining
+
+Sitio de entrenamiento personal. Un solo repositorio con frontend y backend **separados**.
+
+## Layout
+
+| Path | Role |
+|------|------|
+| `frontend/` | App React |
+| `backend/` | API Node.js |
+
+No mezclar UI y API en la misma carpeta. Commits y cambios van al lado que corresponda.
+
+## Stack
+
+- Frontend: React + TypeScript + Vite + Tailwind en `frontend/` (`npm run dev` → puerto 5173).
+- Layout marketing: composición estable en escritorio (`desk`, `.page-shell`); ver `23-responsive-layout.mdc`.
+- Catálogos para UI: 21st.dev para secciones/componentes y React Bits para efectos, textos animados, fondos e interacciones; reutilizar primero lo local. Ver `21-react-and-21st.mdc` y `22-react-bits.mdc`.
+- Backend: Node.js + Express en `backend/` (`npm run dev` → puerto 4000). `GET /api/site`, `POST /api/leads`.
+- Datos locales (prototipo): Postgres en `127.0.0.1:5433`, base `webpersonaltraining` (independiente de otras bases del mismo servidor). Esquema en `backend/db/`. Aplicar: `backend/db/apply.sh` (lee `backend/.env`).
+- Marca: **Power Up** (logo en `frontend/public/brand/power-up-logo.png`). Paleta negro + degradado naranja→azul. No uses la identidad provisional “UNO”.
+- Secretos solo en `.env` / entorno — nunca en el código ni en git.
+- `.gitignore` excluye archivos de entorno y credenciales. Las plantillas `.env.example` / `.env.*.example` solo contienen valores ficticios seguros.
+
+El scaffolding ya existe: Vite/React en `frontend/`, Express en `backend/`.
+
+## Convenciones
+
+- Reutiliza patrones del propio repo antes de inventar capas.
+- No cambies formas de API, nombres de campos ni status codes sin necesidad.
+- Las convenciones comunes están en `AGENTS.md`; las reglas de Cursor las complementan.
+- Graphify está preparado, pendiente de indexación inicial. Solo consulta el grafo si existe `graphify-out/graph.json` y refleja el código actual; si falta o está desactualizado, usa búsqueda directa. Reindexación y configuración local: `graphify.mdc`.

@@ -1,0 +1,40 @@
+---
+description: Skills de ingeniería — solo en trabajo gordo (no en cada arreglo)
+alwaysApply: true
+---
+
+# Agent skills (flujo de ingeniería)
+
+Las skills mejoran features, rediseños y trabajo de riesgo. **No las leas en cada petición**: cada Read es un round-trip.
+
+## Fast path (por defecto)
+
+Sigue `AGENTS.md`, `01-core` y las reglas del repo. Salvo invocación explícita del usuario, requisitos del entorno o trabajo especializado/de riesgo, **no** abras `using-agent-skills` ni ningún `SKILL.md` cuando:
+
+- El arreglo es local (un archivo o pocos, bug, copy, estilo, config).
+- Es un follow-up de la misma tarea.
+- El usuario ya indicó el archivo o el cambio es mecánico.
+
+Si el catálogo lista la misma skill en `~/.cursor/skills` y en el repo, usa **solo la del repo**. No leas las dos.
+
+## Cuándo SÍ leer la skill (salta el meta-router)
+
+Lee **directamente** `.cursor/skills/<nombre>/SKILL.md` (o `~/.cursor/skills/<nombre>/SKILL.md` si el repo no la tiene). No pases por `using-agent-skills` salvo que no sepas cuál aplica:
+
+| Caso | Skill |
+|------|--------|
+| Página o feature nueva / cambio multi-archivo grande | `incremental-implementation` (y `frontend-ui-engineering` si es UI) |
+| Rediseño o UI nueva de calidad visual | `design-taste-frontend` (+ `redesign-existing-projects` si el sitio ya existe) |
+| Buscar/adaptar nuevas secciones o componentes React de 21st.dev | `21st-cli-use` (seguir `21-react-and-21st.mdc`) |
+| Textos animados, fondos, efectos o interacciones React Bits | Seguir `22-react-bits.mdc` y consultar la documentación oficial del componente; no requiere una skill local adicional |
+| Vídeo / motion / HyperFrames | `hyperframes` |
+| Bug difícil sin causa clara | `debugging-and-error-recovery` |
+| Auth, secretos, rate limit, datos personales | `security-and-hardening` |
+
+Checklists en `.cursor/references/` solo si la skill lo exige **y** la tarea es grande.
+
+Las instrucciones del usuario y del entorno prevalecen; después `AGENTS.md` y las reglas del repo mandan sobre las skills locales si hay conflicto. Las skills no añaden permisos, commits ni comprobaciones obligatorias fuera del alcance autorizado. Ajusta la verificación al riesgo y a las herramientas existentes.
+
+**Publicar / desplegar:** no uses `shipping-and-launch` ni `ci-cd-and-automation`. No están instaladas a propósito. El usuario decide cómo se publica.
+
+Skills locales extra (p. ej. `react-doctor`) conviven con este pack; no las pises.

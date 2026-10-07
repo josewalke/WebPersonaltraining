@@ -1,0 +1,27 @@
+# Dependencias y cachés
+node_modules/
+.npm/
+.cache/
+*.tsbuildinfo
+
+# Compilación y pruebas
+dist/
+build/
+coverage/
+playwright-report/
+test-results/
+
+# Entorno y credenciales (las plantillas no contienen secretos)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+
+# Logs y archivos locales
+*.log
+.DS_Store
+
+# Grafo generado; conservar la configuración en .graphifyignore
+graphify-out/

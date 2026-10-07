@@ -1,0 +1,35 @@
+---
+description: React y catálogo 21st.dev para nuevas secciones y componentes de WebPersonaltraining
+globs: "frontend/**/*"
+alwaysApply: false
+---
+
+# React y 21st.dev
+
+## React
+
+- Implementa la UI en `frontend/` con React; prefiere TypeScript para código nuevo y componentes funcionales con hooks.
+- Sigue el gestor, scripts, estructura y versiones reales del proyecto. Si aún no hay scaffolding, configúralo cuando la tarea pida crear la aplicación, no por leer esta regla.
+- Reutiliza componentes, tipos, hooks y estilos existentes. Mantén el estado en el menor ámbito necesario, deriva valores calculados y reserva los efectos para sincronización con sistemas externos.
+- No añadas librerías de estado, animación o UI sin una necesidad concreta. Aplica las reglas de frontend, TypeScript y accesibilidad del proyecto.
+
+## Selección de componentes
+
+1. Busca primero una implementación reutilizable en el proyecto.
+2. Si falta y vas a crear una sección visual o un componente relevante, consulta `.cursor/skills/21st-cli-use/SKILL.md` y busca una opción en **21st.dev** mediante el MCP/CLI disponible. Para textos animados, fondos, efectos e interacciones visuales, prioriza **React Bits** siguiendo `22-react-bits.mdc`. Consulta el catálogo pertinente; no es necesario buscar en ambos para cada pieza.
+3. Elige por adecuación al producto, comportamiento, accesibilidad, compatibilidad y coste de dependencias. Adapta textos al español y estilos a la identidad de WebPersonaltraining; no copies una demo completa sin necesidad.
+4. Si no hay un componente adecuado o falla el acceso al catálogo, continúa con una implementación propia en React e informa brevemente de la decisión.
+
+Para arreglos locales, cambios de texto/estilo o ajustes de componentes existentes, trabaja directamente sobre el código; no repitas búsquedas del catálogo. React es la base de la UI; 21st.dev y React Bits son fuentes de componentes para integrarla.
+
+## Integración
+
+- Inspecciona el código, dependencias, licencia y posibles accesos externos antes de incorporar un componente. Comprueba las instrucciones actuales del CLI antes de ejecutar una instalación.
+- Usa shadcn/ui y Tailwind cuando encajen con el componente y el stack. Reutiliza la configuración existente; no migres la aplicación ni reemplaces su sistema visual solo para instalar una pieza.
+- Mantén la lógica de negocio y llamadas a la API del proyecto; los datos de las demos no son datos reales.
+- Las credenciales del catálogo pertenecen al entorno o al mecanismo de autenticación de la herramienta. Nunca las incluyas en React, variables `VITE_*`, archivos públicos, logs o Git.
+- Esta regla no autoriza publicar en 21st.dev, contratar planes ni consumir generación de pago. Si falta acceso autorizado, usa la alternativa local sin bloquear la tarea.
+
+## Verificación
+
+Revisa las dependencias y el cambio real; ejecuta las comprobaciones disponibles pertinentes. Para UI nueva, comprueba responsive, teclado, foco, nombres accesibles y movimiento reducido. No declares una integración instalada o funcional si solo has añadido instrucciones.

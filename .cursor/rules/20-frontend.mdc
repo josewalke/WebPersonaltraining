@@ -1,0 +1,55 @@
+---
+description: Frontend React/UI implementation standards
+globs: "**/*.{tsx,jsx,css}"
+alwaysApply: false
+---
+
+# Frontend
+
+Before creating a new component:
+
+1. Search for an existing reusable component.
+2. Search for existing styling patterns.
+3. Check existing hooks and utilities.
+
+Prefer composition over duplication.
+
+## Components
+
+- Clear responsibility per component.
+- Separate business logic from presentation when complexity justifies it.
+- Do not extract trivial components without clear benefit.
+- Avoid giant monolithic components and unnecessary state.
+- Derive values instead of storing duplicated state.
+
+## UI
+
+When modifying an existing interface:
+
+- Preserve the existing visual language (spacing, typography, colors, radius, interactions) unless asked otherwise.
+- Do not redesign unrelated parts of the page.
+- Maintain responsive behavior (ver `23-responsive-layout.mdc`: misma composición en escritorio, fluidizar tamaños; no canvas con `scale` ni bandas).
+- Avoid unnecessary layout shifts.
+- Brand pages: keep the existing brand identity strong; do not invent a new visual system.
+
+## Accessibility
+
+- Use semantic HTML and native controls when possible.
+- Give controls accessible names; associate form fields with labels and errors.
+- Keep interactions usable by keyboard, with visible focus and no keyboard traps.
+- Maintain readable text contrast; do not communicate meaning through color alone.
+- Provide meaningful alternative text for informative images and empty alt text for decorative images.
+- Respect `prefers-reduced-motion` and avoid motion that prevents using the interface.
+- Check keyboard use and responsive behavior when changing interactions or layout.
+
+## State
+
+Prefer the smallest appropriate scope: local → shared → context/global.
+
+Do not place state globally without a real cross-component need.
+
+## Performance
+
+Do not add `useMemo` / `useCallback` automatically. Use memoization only with a concrete reason.
+
+Avoid unnecessary rerenders, duplicated API requests, and unnecessary effects.

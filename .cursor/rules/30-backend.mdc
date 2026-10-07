@@ -1,0 +1,40 @@
+---
+description: Backend APIs, services, Express routes and business logic
+globs: "backend/**/*.{js,ts,mjs,cjs}"
+alwaysApply: false
+---
+
+# Backend
+
+Apply when modifying backend APIs, controllers, services, or persistence.
+
+## Boundaries
+
+Follow the existing architecture first. Typical separation when already present:
+
+- Route/controller: HTTP, request extraction, response formatting
+- Service: business logic / orchestration
+- Data layer: persistence
+
+Do not introduce extra layers if the project intentionally keeps a simpler structure.
+
+## Input
+
+Treat external data as untrusted. Validate request bodies, route params, query params, and external API responses when necessary.
+
+## Errors
+
+- Handle expected domain errors explicitly.
+- Preserve useful error context.
+- Do not expose stack traces or secrets to clients.
+- Do not silently catch errors.
+
+## Database
+
+- Avoid unnecessary queries and obvious N+1 patterns.
+- Do not change schemas or migrations unless required.
+- Preserve transaction boundaries where consistency matters.
+
+## API compatibility
+
+Do not change response shapes, field names, status codes, or endpoint behavior unless the feature requires it. Consider existing consumers (frontend admin, public forms) before breaking changes.
