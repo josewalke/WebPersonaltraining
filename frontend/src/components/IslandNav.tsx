@@ -145,7 +145,7 @@ export function IslandNav() {
                 viewTransition
                 className="tap group inline-flex min-h-10 items-center gap-2 rounded-full brand-fill py-2 pr-2 pl-5 text-sm font-medium text-ink"
               >
-                Reservar
+                Pedir plaza
                 <span className="grid size-8 place-items-center rounded-full bg-ink/20 transition duration-500 ease-soft group-hover:translate-x-0.5 group-hover:-translate-y-px">
                   <ArrowUpRight weight="light" className="size-4" aria-hidden />
                 </span>

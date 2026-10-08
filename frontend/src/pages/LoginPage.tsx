@@ -4,7 +4,9 @@ import { useAuth } from '../auth-context'
 import type { UserRole } from '../types'
 
 const DEMO_ENABLED =
-  import.meta.env.DEV || String(import.meta.env.VITE_DEMO_LOGIN ?? '').toLowerCase() === 'true'
+  import.meta.env.DEV ||
+  String(import.meta.env.VITE_DEMO_LOGIN ?? '').toLowerCase() === 'true' ||
+  String(import.meta.env.VITE_DATA_MODE ?? '').toLowerCase() === 'local'
 
 /** Credenciales solo en desarrollo/demo; no se incluyen en el bundle de producción. */
 const DEMO = DEMO_ENABLED
@@ -153,7 +155,7 @@ export function LoginPage() {
         </form>
         <p className="mt-6 text-sm text-ink-soft">
           ¿Aún no tienes cuenta de cliente?{' '}
-          <Link to="/contacto" className="text-ember underline-offset-4 hover:underline">
+          <Link to="/contacto" className="text-ember underline underline-offset-4">
             Pide plaza
           </Link>
           .

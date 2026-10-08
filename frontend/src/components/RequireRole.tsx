@@ -22,6 +22,12 @@ export function RequireRole({
   }
 
   if (!auth.user) {
+    if (auth.status === 'error') {
+      return <main className="mx-auto max-w-3xl px-6 pt-32 pb-24">
+        <p role="alert">{auth.message}</p>
+        <button type="button" className="tap mt-6 rounded-full brand-fill px-6 py-3 text-ink" onClick={() => void auth.refresh()}>Reintentar acceso</button>
+      </main>
+    }
     return <Navigate to="/acceso" replace state={{ from: location.pathname }} />
   }
 

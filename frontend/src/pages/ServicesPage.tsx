@@ -34,7 +34,7 @@ function formatPrice(service: Service) {
 function contactPath(service: Service) {
   const modality =
     service.modality === 'hibrido' ? 'indiferente' : service.modality
-  return `/contacto?modalidad=${modality}`
+  return `/contacto?${new URLSearchParams({ modalidad: modality, servicio: service.id })}`
 }
 
 export function ServicesPage() {
@@ -98,7 +98,7 @@ export function ServicesPage() {
                     className="relative mt-6 inline-flex text-ember underline-offset-4 transition hover:underline"
                     viewTransition
                   >
-                    Pedir esta modalidad →
+                    Pedir este servicio →
                   </Link>
                 </SpotlightCard>
               </StaggerItem>
@@ -108,6 +108,14 @@ export function ServicesPage() {
       ) : (
         <p className="mt-16 text-ink-soft">Los servicios se mostrarán en cuanto haya conexión con el estudio.</p>
       )}
+      <Reveal className="mt-16 border-t border-white/15 pt-10">
+        <h2 className="font-display text-3xl">Antes de confirmar tu primera cita</h2>
+        <dl className="mt-6 grid gap-6 desk:grid-cols-3">
+          <div><dt className="text-ember">Servicio y modalidad</dt><dd className="mt-2 text-ink-soft">La solicitud conserva el servicio elegido y si prefieres venir a Las Palmas o entrenar online. Puedes cambiar ambos en el formulario.</dd></div>
+          <div><dt className="text-ember">Precio e inclusiones</dt><dd className="mt-2 text-ink-soft">Consulta duración y precio orientativo de cada ficha. Antes de aceptar, confirma el importe final, el material necesario y qué seguimiento incluye tu servicio.</dd></div>
+          <div><dt className="text-ember">Reserva y cambios</dt><dd className="mt-2 text-ink-soft">Enviar el formulario no realiza un pago ni confirma una cita. La disponibilidad, el horario y las condiciones de cambios o cancelación deben quedar acordados antes de reservar.</dd></div>
+        </dl>
+      </Reveal>
     </main>
   )
 }

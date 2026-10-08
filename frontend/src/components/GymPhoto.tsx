@@ -1,3 +1,5 @@
+import { assetUrl } from '../asset-url'
+
 type GymPhotoProps = {
   src: string
   alt: string
@@ -15,9 +17,10 @@ export function GymPhoto({
   priority = false,
   framed = true,
 }: GymPhotoProps) {
+  const resolved = assetUrl(src)
   const image = (
     <img
-      src={src}
+      src={resolved}
       alt={alt}
       width={1600}
       height={900}
@@ -31,7 +34,7 @@ export function GymPhoto({
   if (!framed) {
     return (
       <img
-        src={src}
+        src={resolved}
         alt={alt}
         width={1600}
         height={900}

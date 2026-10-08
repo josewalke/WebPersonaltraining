@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useId, useMemo, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { ArrowClockwise, PencilSimple, Plus, Trash } from '@phosphor-icons/react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import { SoftSwap } from '../components/Reveal'
 import { WEEKDAYS, type Weekday, weekdayLabel } from '../weekdays'
+import { DOSE_UNITS, doseMetric, type DoseUnit } from '../dose'
 
 export type StudioClient = {
   id: string
@@ -34,6 +35,7 @@ type Assigned = {
   weekday: Weekday
   sets: number | null
   reps: string | null
+  doseUnit: DoseUnit
   restSeconds: number | null
   notes: string | null
   completionStatus: 'done' | 'missed' | null
@@ -51,7 +53,7 @@ const fieldClass =
 function dose(item: Assigned) {
   const parts = [
     item.sets ? `${item.sets} series` : null,
-    item.reps ? `${item.reps} reps` : null,
+    item.reps ? `${doseMetric(item.reps, item.doseUnit).value} ${item.doseUnit === 'repetitions' ? 'repeticiones' : ''}`.trim() : null,
     item.restSeconds != null ? `${item.restSeconds}s` : null,
   ].filter(Boolean)
   return parts.length ? parts.join(' · ') : 'Sin dosis aún'
@@ -80,6 +82,20 @@ export function AdminExercises({
   clientId: string
   onClientId: (id: string) => void
 }) {
+  const tabsId = useId()
+  function onDayKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const days = ['all', ...WEEKDAYS.map((day) => day.value)] as const
+    const index = days.findIndex((day) => day === viewDay)
+    let next = index
+    if (event.key === 'ArrowRight') next = (index + 1) % days.length
+    else if (event.key === 'ArrowLeft') next = (index + days.length - 1) % days.length
+    else if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = days.length - 1
+    else return
+    event.preventDefault()
+    setViewDay(days[next])
+    event.currentTarget.querySelector<HTMLButtonElement>(`[data-day="${days[next]}"]`)?.focus()
+  }
   const [categories, setCategories] = useState<Category[]>([])
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [assigned, setAssigned] = useState<Assigned[]>([])
@@ -92,6 +108,7 @@ export function AdminExercises({
   const [weekday, setWeekday] = useState<Weekday>(1)
   const [sets, setSets] = useState('3')
   const [reps, setReps] = useState('8-12')
+  const [doseUnit, setDoseUnit] = useState<DoseUnit>('repetitions')
   const [rest, setRest] = useState('90')
   const [notes, setNotes] = useState('')
   const [viewDay, setViewDay] = useState<Weekday | 'all'>('all')
@@ -101,6 +118,7 @@ export function AdminExercises({
   const [editWeekday, setEditWeekday] = useState<Weekday>(1)
   const [editSets, setEditSets] = useState('3')
   const [editReps, setEditReps] = useState('8-12')
+  const [editDoseUnit, setEditDoseUnit] = useState<DoseUnit>('repetitions')
   const [editRest, setEditRest] = useState('90')
   const [editNotes, setEditNotes] = useState('')
   const [savingEdit, setSavingEdit] = useState(false)
@@ -156,7 +174,7 @@ export function AdminExercises({
 
   const visibleAssigned = useMemo(() => {
     if (viewDay === 'all') {
-      return assigned
+      return [...assigned]
     }
     return assigned.filter((item) => item.weekday === viewDay)
   }, [assigned, viewDay])
@@ -235,6 +253,7 @@ export function AdminExercises({
           weekday,
           sets: sets ? Number(sets) : null,
           reps,
+          doseUnit,
           restSeconds: rest ? Number(rest) : null,
           notes,
         }),
@@ -272,6 +291,7 @@ export function AdminExercises({
     setEditWeekday(item.weekday)
     setEditSets(item.sets != null ? String(item.sets) : '')
     setEditReps(item.reps ?? '')
+    setEditDoseUnit(item.doseUnit ?? 'repetitions')
     setEditRest(item.restSeconds != null ? String(item.restSeconds) : '')
     setEditNotes(item.notes ?? '')
     setError(null)
@@ -293,6 +313,7 @@ export function AdminExercises({
             weekday: editWeekday,
             sets: editSets ? Number(editSets) : null,
             reps: editReps,
+            doseUnit: editDoseUnit,
             restSeconds: editRest ? Number(editRest) : null,
             notes: editNotes,
           }),
@@ -445,11 +466,17 @@ export function AdminExercises({
                   <div
                     role="tablist"
                     aria-label="Días de la semana"
+                    aria-orientation="horizontal"
+                    onKeyDown={onDayKeyDown}
                     className="scroll-strip flex w-full max-w-full gap-1 overflow-x-auto rounded-full bg-clay p-1 ring-1 ring-white/10"
                   >
                     <button
                       type="button"
                       role="tab"
+                      id={`${tabsId}-all`}
+                      data-day="all"
+                      aria-controls={`${tabsId}-panel`}
+                      tabIndex={viewDay === 'all' ? 0 : -1}
                       aria-selected={viewDay === 'all'}
                       className={[
                         'tap shrink-0 rounded-full px-3 py-2 text-sm',
@@ -469,6 +496,10 @@ export function AdminExercises({
                           key={day.value}
                           type="button"
                           role="tab"
+                          id={`${tabsId}-${day.value}`}
+                          data-day={day.value}
+                          aria-controls={`${tabsId}-panel`}
+                          tabIndex={active ? 0 : -1}
                           aria-selected={active}
                           className={[
                             'tap shrink-0 rounded-full px-3 py-2 text-sm',
@@ -488,7 +519,7 @@ export function AdminExercises({
                   </div>
                 </div>
 
-                <div className="panel-scroll mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-3">
+                <div role="tabpanel" id={`${tabsId}-panel`} aria-labelledby={`${tabsId}-${viewDay}`} tabIndex={0} className="panel-scroll mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-3">
                   {picking ? (
                     <div className="mb-5 rounded-[1.5rem] bg-clay p-5 ring-1 ring-white/10">
                       <p className="text-sm text-ink-soft">Elige el día, el ejercicio y la dosis.</p>
@@ -591,7 +622,7 @@ export function AdminExercises({
                           </div>
                           <div>
                             <label htmlFor="dose-reps" className="mb-1 block text-sm text-ink-soft">
-                              Reps
+                              Dosis
                             </label>
                             <input
                               id="dose-reps"
@@ -599,6 +630,10 @@ export function AdminExercises({
                               onChange={(event) => setReps(event.target.value)}
                               className={fieldClass}
                             />
+                            <label htmlFor="dose-unit" className="mt-2 block text-sm text-ink-soft">Unidad</label>
+                            <select id="dose-unit" value={doseUnit} onChange={(event) => setDoseUnit(event.target.value as DoseUnit)} className={fieldClass}>
+                              {DOSE_UNITS.map((unit) => <option key={unit.value} value={unit.value}>{unit.label}</option>)}
+                            </select>
                           </div>
                           <div>
                             <label htmlFor="dose-rest" className="mb-1 block text-sm text-ink-soft">
@@ -688,7 +723,7 @@ export function AdminExercises({
                                               ? 'text-ember'
                                               : item.completionStatus === 'missed'
                                                 ? 'text-ink-soft'
-                                                : 'text-ink-soft/70',
+                                                : 'text-ink-soft',
                                           ].join(' ')}
                                         >
                                           {completionLabel(item.completionStatus)}
@@ -780,7 +815,7 @@ export function AdminExercises({
                                             htmlFor={`edit-reps-${item.id}`}
                                             className="mb-1 block text-sm text-ink-soft"
                                           >
-                                            Reps
+                                            Dosis
                                           </label>
                                           <input
                                             id={`edit-reps-${item.id}`}
@@ -788,6 +823,10 @@ export function AdminExercises({
                                             onChange={(event) => setEditReps(event.target.value)}
                                             className={fieldClass}
                                           />
+                                          <label htmlFor={`edit-unit-${item.id}`} className="mt-2 block text-sm text-ink-soft">Unidad</label>
+                                          <select id={`edit-unit-${item.id}`} value={editDoseUnit} onChange={(event) => setEditDoseUnit(event.target.value as DoseUnit)} className={fieldClass}>
+                                            {DOSE_UNITS.map((unit) => <option key={unit.value} value={unit.value}>{unit.label}</option>)}
+                                          </select>
                                         </div>
                                         <div>
                                           <label

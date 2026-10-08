@@ -151,6 +151,89 @@
   margin-inline: auto;
 }
 
+/*
+  Halo corto sobre la silueta. El margen interior del wrap deja respirar
+  el filtro antes del fundido y evita recortarlo en el rectángulo de la imagen.
+*/
+.trainer-hero-photo {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  object-position: bottom;
+  /* Compensar los márgenes transparentes del original sin reescalar el archivo. */
+  margin-left: calc(var(--trainer-photo-height) * -0.208);
+  margin-right: calc(var(--trainer-photo-height) * -0.176);
+}
+
+.portrait-silhouette {
+  filter:
+    drop-shadow(0 0 3px rgb(255 236 210 / 0.25))
+    drop-shadow(0 0 9px rgb(255 214 170 / 0.12))
+    drop-shadow(0 8px 20px rgb(0 0 0 / 0.3));
+}
+
+.trainer-profile-photo-wrap {
+  box-sizing: content-box;
+  padding: 1.5rem;
+  margin: -1.5rem;
+  /* Terminar el fundido antes del borde real de los pies y del banco. */
+  --portrait-bottom-fade: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 64%,
+    rgb(0 0 0 / 0.65) 76%,
+    rgb(0 0 0 / 0.16) 86%,
+    transparent 94%
+  );
+  -webkit-mask-image: var(--portrait-bottom-fade);
+  mask-image: var(--portrait-bottom-fade);
+}
+
+.trainer-mobile-photo-wrap {
+  --trainer-photo-height: clamp(18rem, 48dvh, 28rem);
+  height: var(--trainer-photo-height);
+}
+
+.trainer-hero-photo-wrap,
+.trainer-mobile-photo-wrap {
+  box-sizing: content-box;
+  padding: 1.5rem;
+  margin: -1.5rem;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 62%,
+    rgb(0 0 0 / 0.55) 78%,
+    rgb(0 0 0 / 0.15) 90%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 62%,
+    rgb(0 0 0 / 0.55) 78%,
+    rgb(0 0 0 / 0.15) 90%,
+    transparent 100%
+  );
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.trainer-hero-photo-wrap {
+  --trainer-photo-height: clamp(22rem, 82dvh, 58rem);
+  height: var(--trainer-photo-height);
+}
+
+@media (width < 64rem) {
+  .trainer-hero-photo-wrap {
+    --trainer-photo-height: clamp(20rem, 72dvh, 52rem);
+  }
+}
+
 .home-hero-heading {
   display: block;
   font-size: clamp(3rem, 8vw, 10.75rem);
@@ -269,4 +352,19 @@
   z-index: 1;
   opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('/fonts/oswald-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/outfit-latin.woff2') format('woff2');
 }

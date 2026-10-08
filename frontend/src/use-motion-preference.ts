@@ -18,7 +18,7 @@ export function useIsDesktop() {
   const [desktop, setDesktop] = useState(false)
 
   useEffect(() => {
-    const media = window.matchMedia('(min-width: 768px)')
+    const media = window.matchMedia('(min-width: 1024px)')
     const sync = () => setDesktop(media.matches)
     sync()
     media.addEventListener('change', sync)

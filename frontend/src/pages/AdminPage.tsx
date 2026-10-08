@@ -63,7 +63,8 @@ export function AdminPage() {
         lead.fullName.toLowerCase().includes(needle) ||
         lead.email.toLowerCase().includes(needle) ||
         (lead.message ?? '').toLowerCase().includes(needle) ||
-        (lead.preferredModality ?? '').toLowerCase().includes(needle)
+        (lead.preferredModality ?? '').toLowerCase().includes(needle) ||
+        (lead.serviceName ?? '').toLowerCase().includes(needle)
       )
     })
   }, [leadQuery, leadStatus, leads])
@@ -263,6 +264,7 @@ export function AdminPage() {
                         {lead.email}
                         {lead.phone ? ` · ${lead.phone}` : ''}
                         {lead.preferredModality ? ` · ${lead.preferredModality}` : ''}
+                        {lead.serviceName ? ` · ${lead.serviceName}` : ''}
                         {lead.createdAt
                           ? ` · ${new Date(lead.createdAt).toLocaleDateString('es-ES')}`
                           : ''}

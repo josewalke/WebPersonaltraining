@@ -1,15 +1,19 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight } from '@phosphor-icons/react'
+import { assetUrl } from '../asset-url'
 import { GymPhoto } from '../components/GymPhoto'
 import { Reveal, Stagger, StaggerItem } from '../components/Reveal'
 import CircularText from '../components/react-bits/CircularText'
-import SplitText from '../components/react-bits/SplitText'
-import { usePrefersReducedMotion } from '../use-motion-preference'
+import { useIsDesktop, usePrefersReducedMotion } from '../use-motion-preference'
 import { useSite } from '../use-site'
+
+const SplitText = lazy(() => import('../components/react-bits/SplitText'))
 
 export function HomePage() {
   const site = useSite()
   const reduced = usePrefersReducedMotion()
+  const desktop = useIsDesktop()
   const bio =
     site.status === 'ready'
       ? (site.data.trainer.bio ?? 'Entrenamiento personal sin ruido.')
@@ -20,6 +24,20 @@ export function HomePage() {
       ? site.data.trainer.city
       : 'Las Palmas de Gran Canaria'
   const headline = 'Entrena con\nalguien que te\nmira de\u00A0verdad.'
+  const portrait = (
+    <img
+      src={assetUrl('/media/trainer-portrait-hq.webp')}
+      srcSet={`${assetUrl('/media/trainer-portrait-640.webp')} 640w, ${assetUrl('/media/trainer-portrait-hq.webp')} 1122w`}
+      sizes="(max-width: 1023px) 350px, 750px"
+      alt={`${trainerName}, entrenador personal en ${city}.`}
+      width={1122}
+      height={1402}
+      className="trainer-hero-photo portrait-silhouette select-none"
+      loading="eager"
+      decoding="async"
+      fetchPriority="high"
+    />
+  )
 
   return (
     <main>
@@ -36,16 +54,19 @@ export function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/10" aria-hidden />
         {/* Cubre el borde inferior de la foto para no dejar un hilo claro al pasar de sección. */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-10 bg-gradient-to-t from-ink from-40% to-transparent" aria-hidden />
-
-        <img
-          src="/media/trainer-1.png"
-          alt={`${trainerName}, entrenador personal en ${city}.`}
-          width={446}
-          height={994}
-          className="pointer-events-none absolute right-[clamp(-1.5rem,2vw,2.5rem)] bottom-0 z-[2] h-[clamp(20rem,72dvh,52rem)] w-auto max-w-none select-none object-contain object-bottom max-desk:right-[-12%] max-desk:opacity-45"
-          loading="eager"
-          decoding="async"
-          fetchPriority="high"
+        <div
+          className="trainer-hero-photo-wrap pointer-events-none absolute right-[clamp(-1.5rem,2vw,2.5rem)] bottom-0 z-[2] hidden desk:block"
+        >
+          {portrait}
+        </div>
+        {/* Niebla inferior: disuelve el corte del contorno y de las piernas. */}
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-[clamp(10rem,28vh,17rem)] bg-gradient-to-t from-ink from-30% via-ink/80 to-transparent"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute bottom-0 right-0 z-[3] h-[clamp(14rem,38vh,22rem)] w-[min(58%,34rem)] bg-[radial-gradient(ellipse_at_70%_100%,var(--color-ink)_0%,rgb(10_10_10/0.8)_45%,transparent_74%)]"
+          aria-hidden
         />
 
         <div className="page-shell home-hero-content relative z-10 grid min-h-[100dvh] items-end gap-[clamp(1.25rem,2.5vw,2rem)] pt-[clamp(6rem,12vh,8rem)] pb-[clamp(2.5rem,5vh,4rem)] desk:grid-cols-12">
@@ -55,11 +76,12 @@ export function HomePage() {
                 {trainerName} · {city} · 1 : 1
               </p>
             </Reveal>
-            {reduced ? (
+            {reduced || !desktop ? (
               <h1 className="home-hero-heading font-display">
                 {headline}
               </h1>
             ) : (
+              <Suspense fallback={<h1 className="home-hero-heading font-display">{headline}</h1>}>
               <SplitText
                 tag="h1"
                 text={headline}
@@ -73,7 +95,11 @@ export function HomePage() {
                 threshold={0.2}
                 rootMargin="-20px"
               />
+              </Suspense>
             )}
+          </div>
+          <div className="flex justify-center desk:hidden">
+            <div className="trainer-mobile-photo-wrap pointer-events-none relative">{portrait}</div>
           </div>
           <Reveal
             className="flex flex-col items-start gap-[clamp(1.25rem,2.5vw,2rem)] desk:col-span-4 desk:items-end"

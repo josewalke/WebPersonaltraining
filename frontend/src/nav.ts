@@ -7,4 +7,6 @@ export const NAV_LINKS = [
 ] as const
 
 export const BRAND = 'Power Up'
-export const LOGO_SRC = '/brand/power-up-logo.png'
+export const LOGO_PATH = '/brand/power-up-logo.webp'
+/** @deprecated Usa LOGO_PATH + assetUrl; se mantiene por compatibilidad. */
+export const LOGO_SRC = '/brand/power-up-logo.webp'

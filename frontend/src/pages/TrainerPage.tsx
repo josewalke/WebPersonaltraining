@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowUpRight } from '@phosphor-icons/react'
+import { assetUrl } from '../asset-url'
 import { GymPhoto } from '../components/GymPhoto'
 import SplitText from '../components/react-bits/SplitText'
 import { Reveal, Stagger, StaggerItem } from '../components/Reveal'
@@ -40,36 +41,54 @@ export function TrainerPage() {
     site.status === 'ready'
       ? (site.data.trainer.story ?? site.data.trainer.bio)
       : null
-  const photoUrl =
-    site.status === 'ready' ? site.data.trainer.photoUrl?.trim() || null : null
+  const configuredPhoto = site.status === 'ready' ? site.data.trainer.photoUrl?.trim() : null
+  const bundledPhotos = ['/media/trainer-2.png', '/media/trainer-bench.png', '/media/trainer-hero.png']
+  const photoPath =
+    !configuredPhoto || bundledPhotos.includes(configuredPhoto.split('?')[0])
+      ? '/media/trainer-bench-hq.webp'
+      : configuredPhoto
+  const photoUrl = assetUrl(photoPath)
+  const photoSrcSet =
+    photoPath === '/media/trainer-bench-hq.webp'
+      ? `${assetUrl('/media/trainer-bench-640.webp')} 640w, ${assetUrl('/media/trainer-bench-hq.webp')} 1122w`
+      : undefined
   const credentials =
     site.status === 'ready' ? site.data.trainer.credentials.filter(Boolean) : []
   const publicName = personName ?? brand
 
   return (
     <main>
-      <section className="relative isolate min-h-[min(100dvh,52rem)] overflow-x-clip text-paper">
-        {photoUrl ? (
-          <GymPhoto
-            src={photoUrl}
-            alt={`${publicName}, entrenador personal de ${brand} en ${city}.`}
-            framed={false}
-            priority
-            className="absolute inset-0 h-full w-full object-cover object-[center_20%]"
-          />
-        ) : (
-          <GymPhoto
-            src="/media/gym-plates.jpg"
-            alt={`Sala de entrenamiento de ${brand} en ${city}.`}
-            framed={false}
-            priority
-            className="absolute inset-0 h-full w-full scale-105 object-cover"
-          />
-        )}
+      <section className="relative isolate min-h-[min(100dvh,52rem)] overflow-hidden bg-ink text-paper">
+        <GymPhoto
+          src="/media/gym-plates.jpg"
+          alt={`Sala de entrenamiento de ${brand} en ${city}.`}
+          framed={false}
+          priority
+          className="absolute inset-0 h-full w-full scale-105 object-cover"
+        />
         <div className="absolute inset-0 bg-ink/35" aria-hidden />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/20" aria-hidden />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-10 bg-gradient-to-t from-ink from-40% to-transparent"
+          aria-hidden
+        />
 
-        <div className="page-shell relative grid min-h-[min(100dvh,52rem)] items-end gap-[clamp(1.25rem,2.5vw,2rem)] pt-[clamp(6rem,12vh,8rem)] pb-[clamp(2.5rem,5vh,4rem)] desk:grid-cols-12">
+        <div className="trainer-profile-photo-wrap pointer-events-none absolute right-[clamp(-0.5rem,1vw,1.5rem)] bottom-0 z-[2] hidden h-[clamp(24rem,82dvh,48rem)] desk:block">
+          <img
+            src={photoUrl}
+            srcSet={photoSrcSet}
+            sizes="(max-width: 1023px) 350px, 650px"
+            alt={`${publicName}, entrenador personal de ${brand} en ${city}, sentado en un banco de entrenamiento.`}
+            width={1122}
+            height={1402}
+            className="portrait-silhouette block h-full w-auto max-w-none select-none object-contain object-bottom"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
+        </div>
+
+        <div className="page-shell relative z-10 grid min-h-[min(100dvh,52rem)] items-end gap-[clamp(1.25rem,2.5vw,2rem)] pt-[clamp(6rem,12vh,8rem)] pb-[clamp(2.5rem,5vh,4rem)] desk:grid-cols-12">
           <div className="desk:col-span-8">
             <Reveal delay={0.05} y={16}>
               <p className="mb-4 text-sm tracking-[0.28em] text-paper/70">
@@ -93,11 +112,13 @@ export function TrainerPage() {
                 to={{ opacity: 1, y: 0 }}
               />
             )}
-            {!photoUrl ? (
-              <p className="mt-4 max-w-md text-sm text-paper/70">
-                Estudio {brand}. La foto del entrenador se añadirá en esta misma página.
-              </p>
-            ) : null}
+          </div>
+          <div className="flex justify-center desk:hidden">
+            <div className="trainer-profile-photo-wrap h-[clamp(18rem,48dvh,28rem)]">
+              <img src={photoUrl}
+            srcSet={photoSrcSet}
+            sizes="(max-width: 1023px) 350px, 650px" alt={`Retrato de ${publicName}, sentado en un banco de entrenamiento.`} width={1122} height={1402} className="portrait-silhouette block h-full w-auto max-w-full object-contain" loading="eager" decoding="async" />
+            </div>
           </div>
           <Reveal
             className="flex flex-col items-start gap-6 desk:col-span-4 desk:items-end"
@@ -106,6 +127,7 @@ export function TrainerPage() {
           >
             <p className="max-w-xs text-paper/85 desk:text-right">{tagline}</p>
             <Link
+              id="hero-cta"
               to="/contacto"
               className="tap group inline-flex items-center gap-3 rounded-full brand-fill py-3 pr-2 pl-6 text-ink"
               viewTransition
@@ -126,13 +148,17 @@ export function TrainerPage() {
             <h2 className="mt-4 font-display text-[clamp(2rem,2.5vw+1rem,3rem)] text-pretty">
               {personName ? `Sobre ${personName.split(' ')[0]}` : 'El estudio'}
             </h2>
-            {photoUrl ? (
-              <GymPhoto
-                src={photoUrl}
-                alt={`Retrato de ${publicName}.`}
-                className="mt-8 aspect-[3/4] max-h-[28rem] w-full rounded-[2rem] desk:hidden"
-              />
-            ) : null}
+            <img
+              src={photoUrl}
+            srcSet={photoSrcSet}
+            sizes="(max-width: 1023px) 350px, 650px"
+              alt={`Retrato de ${publicName}.`}
+              width={1122}
+              height={1402}
+              className="mt-8 mx-auto max-h-[28rem] max-w-full w-auto object-contain desk:hidden"
+              loading="lazy"
+              decoding="async"
+            />
           </Reveal>
           <div className="desk:col-span-7">
             {story ? (

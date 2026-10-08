@@ -11,6 +11,7 @@ export type AdminLead = {
   email: string
   phone: string | null
   preferredModality: string | null
+  serviceName: string | null
   message: string | null
   status: string
   createdAt: string

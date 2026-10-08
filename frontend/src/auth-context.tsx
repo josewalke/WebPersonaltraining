@@ -1,10 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { api } from './api'
+import { api, ApiError } from './api'
 import type { AuthUser } from './types'
 
 type AuthState =
   | { status: 'loading'; user: null }
   | { status: 'guest'; user: null }
+  | { status: 'error'; user: null; message: string }
   | { status: 'ready'; user: AuthUser }
 
 type AuthContextValue = AuthState & {
@@ -22,14 +23,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await api<{ user: AuthUser }>('/api/auth/me')
       setState({ status: 'ready', user: data.user })
-    } catch {
-      setState({ status: 'guest', user: null })
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        setState({ status: 'guest', user: null })
+      } else {
+        setState({ status: 'error', user: null, message: 'No se puede comprobar tu acceso. Revisa la conexión y vuelve a intentarlo.' })
+      }
     }
   }, [])
 
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  useEffect(() => {
+    const expired = () => setState({ status: 'guest', user: null })
+    window.addEventListener('session-expired', expired)
+    return () => window.removeEventListener('session-expired', expired)
+  }, [])
 
   const login = useCallback(async (email: string, password: string) => {
     const data = await api<{ user: AuthUser }>('/api/auth/login', {

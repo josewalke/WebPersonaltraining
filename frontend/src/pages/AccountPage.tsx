@@ -3,6 +3,7 @@ import { useAuth } from '../auth-context'
 import { api } from '../api'
 import { SoftSwap, Stagger, StaggerItem } from '../components/Reveal'
 import { WEEKDAYS, todayWeekday, type Weekday, weekdayLabel } from '../weekdays'
+import { doseMetric, type DoseUnit } from '../dose'
 
 type CompletionStatus = 'done' | 'missed' | null
 
@@ -12,6 +13,7 @@ type AssignedExercise = {
   weekday: Weekday
   sets: number | null
   reps: string | null
+  doseUnit: DoseUnit
   restSeconds: number | null
   notes: string | null
   completionStatus: CompletionStatus
@@ -43,6 +45,8 @@ const MUSCLE: Record<string, string> = {
   cuerpo_completo: 'Cuerpo completo',
 }
 
+type Plan = { weekStart: string; currentWeek: string; readOnly: boolean; availableWeeks: string[]; exercises: AssignedExercise[] }
+
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl bg-ink px-1.5 py-3 text-center ring-1 ring-white/10 sm:px-2">
@@ -57,6 +61,12 @@ export function AccountPage() {
   const user = auth.user
   const [exercises, setExercises] = useState<AssignedExercise[] | null>(null)
   const [weekStart, setWeekStart] = useState<string | null>(null)
+  const [selectedWeek, setSelectedWeek] = useState('')
+  const [availableWeeks, setAvailableWeeks] = useState<string[]>([])
+  const [readOnly, setReadOnly] = useState(false)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [retry, setRetry] = useState(0)
+  const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [selectedDay, setSelectedDay] = useState<Weekday>(todayWeekday)
@@ -64,17 +74,26 @@ export function AccountPage() {
   const focusTabs = useRef(false)
 
   useEffect(() => {
-    setSelectedDay(todayWeekday())
-    void api<{ weekStart: string; exercises: AssignedExercise[] }>('/api/account/exercises')
+    let cancelled = false
+    setExercises(null)
+    setError(null)
+    setLoadFailed(false)
+    setNotice(null)
+    void api<Plan>(`/api/account/exercises${selectedWeek ? `?week=${selectedWeek}` : ''}`)
       .then((data) => {
+        if (cancelled) return
         setExercises(data.exercises)
         setWeekStart(data.weekStart)
+        setAvailableWeeks(data.availableWeeks)
+        setReadOnly(data.readOnly)
       })
       .catch((err: unknown) => {
+        if (cancelled) return
         setError(err instanceof Error ? err.message : 'No se han podido cargar los ejercicios.')
-        setExercises([])
+        setLoadFailed(true)
       })
-  }, [])
+    return () => { cancelled = true }
+  }, [selectedWeek, retry])
 
   useEffect(() => {
     if (!focusTabs.current) return
@@ -131,23 +150,26 @@ export function AccountPage() {
   const dayMissed = dayExercises.filter((item) => item.completionStatus === 'missed').length
 
   const panelKey =
-    exercises === null ? 'loading' : exercises.length === 0 ? 'empty' : `day-${selectedDay}`
+    loadFailed ? 'error' : exercises === null ? 'loading' : exercises.length === 0 ? 'empty' : `${weekStart}-day-${selectedDay}`
 
   async function setCompletion(assignmentId: string, next: CompletionStatus) {
+    if (readOnly || savingId) return
     const current = exercises?.find((item) => item.id === assignmentId)
     const status = current?.completionStatus === next ? null : next
     setSavingId(assignmentId)
     setError(null)
+    setNotice(null)
     try {
-      const result = await api<{ weekStart: string; exercises: AssignedExercise[] }>(
+      const result = await api<Plan>(
         `/api/account/exercises/${assignmentId}/completion`,
         {
           method: 'PUT',
-          body: JSON.stringify({ status }),
+          body: JSON.stringify({ status, weekStart }),
         },
       )
       setExercises(result.exercises)
       setWeekStart(result.weekStart)
+      setNotice('Seguimiento guardado.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se ha podido guardar.')
     } finally {
@@ -161,15 +183,23 @@ export function AccountPage() {
         <p className="text-[11px] tracking-[0.22em] text-ink-soft">cliente</p>
         <h1 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl">Tu plan</h1>
         <p className="mt-4 max-w-md text-sm text-ink-soft sm:text-base">
-          Hola, {user?.displayName}. Marca lo que hiciste esta semana
+          Hola, {user?.displayName}. Consulta tu semana o revisa un registro guardado
           {weekStart
             ? ` (desde el ${new Date(`${weekStart}T12:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })})`
             : ''}
-          . Se guarda y se reinicia cada lunes.
+          . Cada lunes empieza un seguimiento nuevo; los registros guardados siguen en el historial.
         </p>
       </header>
 
       <section className="mt-10 sm:mt-12">
+        <label htmlFor="plan-week" className="mb-2 block text-sm">Semana</label>
+        <select id="plan-week" value={selectedWeek} disabled={savingId !== null} onChange={(event) => setSelectedWeek(event.target.value)} className="mb-4 max-w-full rounded-xl bg-clay px-4 py-3 ring-1 ring-white/15">
+          <option value="">Semana actual</option>
+          {availableWeeks.map((week) => <option key={week} value={week}>Desde el {new Date(`${week}T12:00:00`).toLocaleDateString('es-ES')}</option>)}
+        </select>
+        <p className="mb-6 text-sm text-ink-soft">El historial conserva las semanas consultadas o actualizadas desde su activación. Las semanas anteriores sin copia no se reconstruyen.</p>
+        {readOnly ? <p className="mb-6 text-ember">Registro histórico · solo lectura</p> : null}
+        {notice ? <p className="mb-6 text-ember" role="status">{notice}</p> : null}
         {error ? (
           <p className="mb-6 text-ember" role="alert">
             {error}
@@ -200,7 +230,7 @@ export function AccountPage() {
                   type="button"
                   role="tab"
                   id={`plan-tab-${day.value}`}
-                  aria-controls={`plan-panel-${day.value}`}
+                  aria-controls="plan-panel"
                   aria-selected={active}
                   tabIndex={active ? 0 : -1}
                   className={[
@@ -230,13 +260,19 @@ export function AccountPage() {
         <div
           className="mt-8"
           role={exercises !== null && exercises.length > 0 ? 'tabpanel' : undefined}
-          id={exercises !== null && exercises.length > 0 ? `plan-panel-${selectedDay}` : undefined}
+          id={exercises !== null && exercises.length > 0 ? 'plan-panel' : undefined}
+          tabIndex={exercises !== null && exercises.length > 0 ? 0 : undefined}
           aria-labelledby={
             exercises !== null && exercises.length > 0 ? `plan-tab-${selectedDay}` : undefined
           }
         >
           <SoftSwap panelKey={panelKey}>
-            {exercises === null ? (
+            {loadFailed ? (
+              <div className="rounded-2xl bg-clay p-6">
+                <p>No se ha podido cargar el plan. Tus datos no se han borrado.</p>
+                <button type="button" className="tap mt-4 rounded-full brand-fill px-6 py-3 text-ink" onClick={() => setRetry((value) => value + 1)}>Reintentar</button>
+              </div>
+            ) : exercises === null ? (
               <p className="text-ink-soft">Cargando tu plan…</p>
             ) : exercises.length === 0 ? (
               <p className="rounded-[1.5rem] bg-clay p-6 text-ink-soft ring-1 ring-white/10">
@@ -262,7 +298,6 @@ export function AccountPage() {
                       item.exercise.muscleGroup
                     const done = item.completionStatus === 'done'
                     const missed = item.completionStatus === 'missed'
-                    const busy = savingId === item.id
                     return (
                       <StaggerItem
                         as="li"
@@ -285,7 +320,7 @@ export function AccountPage() {
                           ) : missed ? (
                             <p className="text-xs tracking-wide text-ink-soft uppercase">No hecho</p>
                           ) : (
-                            <p className="text-xs tracking-wide text-ink-soft/70 uppercase">Pendiente</p>
+                            <p className="text-xs tracking-wide text-ink-soft uppercase">Pendiente</p>
                           )}
                         </div>
 
@@ -293,17 +328,17 @@ export function AccountPage() {
 
                         <dl className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
                           <Metric label="Series" value={item.sets != null ? String(item.sets) : '—'} />
-                          <Metric label="Reps" value={item.reps ?? '—'} />
+                          <Metric {...doseMetric(item.reps, item.doseUnit)} />
                           <Metric
                             label="Descanso"
                             value={item.restSeconds != null ? `${item.restSeconds}s` : '—'}
                           />
                         </dl>
 
-                        <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                        {!readOnly ? <div className="mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                           <button
                             type="button"
-                            disabled={busy}
+                            disabled={savingId !== null}
                             aria-pressed={done}
                             className={[
                               'tap min-h-11 rounded-full px-4 text-sm ring-1 disabled:opacity-60 sm:px-5',
@@ -317,7 +352,7 @@ export function AccountPage() {
                           </button>
                           <button
                             type="button"
-                            disabled={busy}
+                            disabled={savingId !== null}
                             aria-pressed={missed}
                             className={[
                               'tap min-h-11 rounded-full px-4 text-sm ring-1 disabled:opacity-60 sm:px-5',
@@ -329,7 +364,7 @@ export function AccountPage() {
                           >
                             No lo hice
                           </button>
-                        </div>
+                        </div> : null}
 
                         {item.notes ? (
                           <p className="mt-5 rounded-2xl bg-ink/70 px-4 py-3 text-sm ring-1 ring-ember/35">

@@ -1,6 +1,8 @@
 import { useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CheckCircle, CircleNotch } from '@phosphor-icons/react'
+import { api, ApiError } from '../api'
+import { useSite } from '../use-site'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const MODALITIES = [
@@ -44,8 +46,12 @@ function validateLead(data: FormData): FieldErrors {
 }
 
 export function LeadForm() {
+  const site = useSite()
   const formId = useId()
   const [searchParams] = useSearchParams()
+  const requestedService = searchParams.get('servicio') ?? ''
+  const services = site.status === 'ready' ? site.data.services : []
+  const serviceAvailable = !requestedService || services.some((service) => service.id === requestedService)
   const defaultModality = useMemo(() => {
     const value = searchParams.get('modalidad') ?? ''
     return MODALITIES.some((item) => item.value === value) ? value : ''
@@ -107,6 +113,7 @@ export function LeadForm() {
     }
 
     const payload = {
+      serviceId: String(data.get('serviceId') ?? '') || null,
       fullName: String(data.get('fullName') ?? ''),
       email: String(data.get('email') ?? ''),
       phone: String(data.get('phone') ?? ''),
@@ -117,25 +124,17 @@ export function LeadForm() {
 
     setStatus('sending')
     try {
-      const response = await fetch('/api/leads', {
+      await api('/api/leads', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      const body = (await response.json()) as { error?: string }
-      if (!response.ok) {
-        setStatus('error')
-        setError(body.error ?? 'No se ha podido enviar.')
-        bumpShake()
-        return
-      }
       setStatus('ok')
       form.reset()
       setChars(0)
       queueMicrotask(() => successRef.current?.focus())
-    } catch {
+    } catch (err) {
       setStatus('error')
-      setError('No hay conexión con el servidor. Inténtalo de nuevo.')
+      setError(err instanceof ApiError ? err.message : 'No hay conexión con el servidor. Inténtalo de nuevo.')
       bumpShake()
     }
   }
@@ -152,7 +151,7 @@ export function LeadForm() {
           <CheckCircle weight="fill" className="size-8" aria-hidden />
           <p className="mt-4 font-display text-3xl">Solicitud enviada</p>
           <p className="mt-2 text-ink/80">
-            Suele haber respuesta en 1–2 días laborables si hay hueco. Revisa también el spam. El acceso de
+            Tu solicitud está registrada en el estudio. El acceso de
             cliente lo crea el estudio después; no se genera solo al pedir plaza.
           </p>
         </div>
@@ -220,6 +219,23 @@ export function LeadForm() {
         className={inputClass(Boolean(fieldErrors.phone))}
         onLiveChange={syncField}
       />
+      <div>
+        <label htmlFor={`${formId}-service`} className="mb-2 block text-sm">Servicio que te interesa</label>
+        <select
+          key={requestedService + site.status}
+          id={`${formId}-service`}
+          name="serviceId"
+          defaultValue={serviceAvailable ? requestedService : ''}
+          className={inputClass()}
+          disabled={site.status === 'loading'}
+        >
+          <option value="">Quiero orientación para elegir</option>
+          {services.map((service) => <option key={service.id} value={service.id}>{service.name}</option>)}
+        </select>
+        {requestedService && !serviceAvailable && site.status === 'ready' ? (
+          <p className="mt-2 text-sm text-ember" role="status">El servicio del enlace ya no está disponible. Puedes elegir otro.</p>
+        ) : null}
+      </div>
       <fieldset>
         <legend className="mb-2 text-sm">Modalidad</legend>
         <div className="flex flex-wrap gap-3">

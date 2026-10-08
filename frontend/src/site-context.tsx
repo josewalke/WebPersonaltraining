@@ -1,4 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { api, ApiError } from './api'
+import { getLocalSite, isLocalDataMode } from './local-db'
 import type { SiteData } from './types'
 
 type SiteStatus =
@@ -23,20 +25,26 @@ export function SiteProvider({ children }: { children: ReactNode }) {
     let cancelled = false
 
     async function load() {
-      try {
-        const response = await fetch('/api/site')
-        if (!response.ok) {
-          throw new Error('No se ha podido cargar el contenido.')
+      if (isLocalDataMode()) {
+        if (!cancelled) {
+          setState({ status: 'ready', data: getLocalSite() })
         }
-        const data = (await response.json()) as SiteData
+        return
+      }
+
+      try {
+        const data = await api<SiteData>('/api/site')
         if (!cancelled) {
           setState({ status: 'ready', data })
         }
-      } catch {
+      } catch (error) {
         if (!cancelled) {
           setState({
             status: 'error',
-            message: 'No se ha podido conectar con el servidor. Revisa que la API esté en marcha.',
+            message:
+              error instanceof ApiError
+                ? error.message
+                : 'No se ha podido conectar con el servidor. Revisa que la API esté en marcha.',
           })
         }
       }
